@@ -1,6 +1,6 @@
 #include <sys/stat.h>
 #include "encode_lib.h"
-#include "./ppm/ppm.h"
+#include "ppm.h"
 #include <string.h>
 #include <errno.h>
 #include <pthread.h>
@@ -89,7 +89,7 @@ limit_threads_t get_limits(int previous_pos[2], int interval, int min, int max)
 }
 
 int main(int argc, char **argv){
-	img = load_ppm("./ppm/img.ppm");
+	img = load_ppm("img.ppm");
 	int nb_threads = 50;
 	pthread_t *threads = malloc(sizeof(pthread_t) * nb_threads);
 	thread_t *threads_param = malloc(sizeof(pthread_t) * nb_threads);
