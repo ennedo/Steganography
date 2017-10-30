@@ -6,7 +6,7 @@ encode.o: encode.c
 	$(GCC) $< -c
 encode_lib.o: encode_lib.c encode_lib.h
 	$(GCC) $< -c
-ppm.o: ./ppm/ppm.c ./ppm/ppm.h
+ppm.o: ppm.c ppm.h
 	$(GCC) $< -c
 run: encode
 	./encode
