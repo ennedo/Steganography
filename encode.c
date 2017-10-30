@@ -4,7 +4,7 @@
 #include <string.h>
 #include <errno.h>
 #include <pthread.h>
-
+//hello
 img_t **img;
 
 typedef struct limit_threads_st {
