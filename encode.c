@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <pthread.h>
 //hello
-img_t *img;
+img_t *img, *img_out;
 
 typedef struct limit_threads_st {
 	int initial_indice;
@@ -73,19 +73,85 @@ limit_threads_t get_limits(int min, int max)
 {
 	limit_threads_t ret;
 
-	ret.initial_indice = floor((float)min/3);
-	ret.final_indice = floor((float)max/3);
+	ret.initial_indice = (floor((float)min/3))+12;
+	ret.final_indice = (floor((float)max/3))+12;
 
 	ret.initial_pos_rgb = min % 3;
 	ret.final_pos_rgb = max % 3;
 
-	//printf("initial_indice : %d reste min %d / final_indice : %d / reste max %d \n", ret.initial_indice, ret.initial_pos_rgb, ret.final_indice, ret.final_pos_rgb);
+	printf("initial_indice : %d reste min %d / final_indice : %d / reste max %d \n", ret.initial_indice, ret.initial_pos_rgb, ret.final_indice, ret.final_pos_rgb);
 
 	return ret;
 }
 
+
+void write_nb_char_in_img(char *nb_char, img_t **img_out)
+{
+	printf("%s\n", nb_char);
+
+	uint8_t rgb = 0;
+	int count = 0, modulo=0;
+	
+
+	for (int i = 0; i < strlen(nb_char); i++)
+	{
+		if (i%3==0 && i>0)
+			count++;
+
+		switch (i%3) 
+		{
+			case 0:
+				rgb = (*img_out)->raw[count].r;
+				rgb = encode_char(rgb, nb_char[i]);
+				(*img_out)->raw[count].r = rgb;
+			  break;
+			case 1:
+			  	rgb = (*img_out)->raw[count].g;
+			  	rgb = encode_char(rgb, nb_char[i]);
+				(*img_out)->raw[count].g = rgb;
+			  break;
+			case 2:
+			  	rgb = (*img_out)->raw[count].b;
+			  	rgb = encode_char(rgb, nb_char[i]);
+				(*img_out)->raw[count].b = rgb;
+			  break;
+		}
+		
+		//printf("La valeur RGB du Pixel %d : %d\n", count, rgb);
+		//printf("La valeur char du Pixel %d : %c\n", count, nb_char[i]);
+
+		
+	}	
+}
+
 int main(int argc, char **argv){
 	img = load_ppm("img.ppm");
+
+	pixel_t test_pixel;
+
+	
+	
+	//img_out = alloc_img(img->width, img->height);
+	img_out = load_ppm("img.ppm");
+
+
+	//write_nb_char_in_img("00000000000000000000001011110100", &img_out);
+
+	// for (int i = 0; i < 11; i++)
+	// {
+	// 	test_pixel = img->raw[i];
+	// 	printf("[IMG] La valeur RGB du Pixel %d : %d\n", i, test_pixel.r);
+	// 	printf("[IMG] La valeur RGB du Pixel %d : %d\n", i, test_pixel.g);
+	// 	printf("[IMG] La valeur RGB du Pixel %d : %d\n", i, test_pixel.b);
+		
+	// 	test_pixel = img_out->raw[i];
+	// 	printf("[IMG_OUT] La valeur RGB du Pixel %d : %d\n", i, test_pixel.r);
+	// 	printf("[IMG_OUT] La valeur RGB du Pixel %d : %d\n", i, test_pixel.g);
+	// 	printf("[IMG_OUT] La valeur RGB du Pixel %d : %d\n", i, test_pixel.b);
+
+	// 	printf("-----------------\n");
+	// }
+
 	int nb_threads = 50;
 	pthread_t *threads = malloc(sizeof(pthread_t) * nb_threads);
 	thread_t *threads_param = malloc(sizeof(pthread_t) * nb_threads);
@@ -105,8 +171,11 @@ int main(int argc, char **argv){
 	}
 		
 	int2bin(nb_char, nb_char_header, 32);
-	// nb_char_header[33] = 0;
+
 	printf("------ nb_char_header %s\n", nb_char_header);
+
+	//write_nb_char_in_img(nb_char_header, &img_out);
+	
 
 	file_to_str("text.txt", nb_char, &text);
 	encode_str(text,nb_char,&text_encoded);
