@@ -57,33 +57,17 @@ int max_char_encode(img_t *img){
 	return floor((img->height * img->width - 11) * 3 / BITS_PER_CHAR);
 }
 
-//limit_threads_t get_limits(int temppos, int interval, int min, int max)
-limit_threads_t get_limits(int previous_pos[2], int interval, int min, int max)
+limit_threads_t get_limits(int min, int max)
 {
 	limit_threads_t ret;
 
-	if (previous_pos[0] != 0)
-	{
-		if (previous_pos[1] == 2)
-		{
-			previous_pos[0]++;
-			previous_pos[1] = 0;
-		}
-		else
-		{
-			previous_pos[1]++;
-		}
-	}
-	
+	ret.initial_indice = floor((float)min/3);
+	ret.final_indice = floor((float)max/3);
 
-	//printf("temppos : %d / interval : %d\n", temppos, interval);
+	ret.initial_pos_rgb = min % 3;
+	ret.final_pos_rgb = max % 3;
 
-	ret.initial_pos_rgb = previous_pos[1];
-	ret.final_pos_rgb = (previous_pos[0]+interval) % 3;
-	ret.initial_indice = previous_pos[0];
-	ret.final_indice = ceil((float)previous_pos[0]+(float)interval/3);
-	//printf("\n coucou: %f\n",ceil((float)(temppos+interval)/3));
-	printf("initial_indice : %d reste min %d / final_indice : %d / reste max %d \n", ret.initial_indice, ret.initial_pos_rgb, ret.final_indice, ret.final_pos_rgb);
+	//printf("initial_indice : %d reste min %d / final_indice : %d / reste max %d \n", ret.initial_indice, ret.initial_pos_rgb, ret.final_indice, ret.final_pos_rgb);
 
 	return ret;
 }
@@ -101,9 +85,6 @@ int main(int argc, char **argv){
 	float interval;
 	limit_threads_t limit;
 
-	//thread_t
-
-
 	if (nb_char > max_char){
 		printf("Fichier texte trop long pour l'image\n");
 		exit(0);
@@ -114,34 +95,25 @@ int main(int argc, char **argv){
 	printf("%s", text_encoded);
 	printf("\n\nnb char * 7 -> %u\nstrlen -> %u\n",nb_char*7,strlen(text_encoded));
 
-	int pos = 0;
-	int previous_pos[2] = {0,0};
 	interval = (float)nb_char_encoded / (float)nb_threads;
 	printf("%f\n\n\n",interval);
+
 	for (int i = 0; i < nb_threads; i++){
 		int min = round(interval * i) + 0;
 		int max = round(interval * (i + 1)) - 1;
 		int char_in_interval = max + 1 - min;
 
-
-		
-
-		
 		char *test = calloc(char_in_interval + 1, sizeof(char));
+		
 		if (char_in_interval > 0){
-			//limit = get_limits(previous_pos[0]*3+previous_pos[1],char_in_interval,min,max);
-			limit = get_limits(previous_pos,char_in_interval,min,max);
-			previous_pos[0] = limit.final_indice;
-			previous_pos[1] = limit.final_pos_rgb;
 
-			// threads_param[i] = 
+			limit = get_limits(min,max);
+
 			memcpy(test, text_encoded + min, char_in_interval);
 			test[char_in_interval] = 0;
 			printf("%s", test);
 			printf("\nInterval: %u, Strlen: %u", char_in_interval, strlen(test));
-		pos++;
 		}
-		pos += char_in_interval;
 		printf("\nMin: %u / Max: %u / Interval: %u\n\n", min, max, char_in_interval);
 	}
 	return 0;
