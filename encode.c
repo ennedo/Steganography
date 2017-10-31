@@ -90,37 +90,15 @@ void write_nb_char_in_img(char *nb_char, img_t **img_out)
 	printf("%s\n", nb_char);
 
 	uint8_t rgb = 0;
-	int count = 0, modulo=0;
-	
+	uint8_t *test_rgb = &(*img_out)->raw[0].r;
+
+	//printf("%d\n", *(test_rgb+3));
 
 	for (int i = 0; i < strlen(nb_char); i++)
 	{
-		if (i%3==0 && i>0)
-			count++;
-
-		switch (i%3) 
-		{
-			case 0:
-				rgb = (*img_out)->raw[count].r;
-				rgb = encode_char(rgb, nb_char[i]);
-				(*img_out)->raw[count].r = rgb;
-			  break;
-			case 1:
-			  	rgb = (*img_out)->raw[count].g;
-			  	rgb = encode_char(rgb, nb_char[i]);
-				(*img_out)->raw[count].g = rgb;
-			  break;
-			case 2:
-			  	rgb = (*img_out)->raw[count].b;
-			  	rgb = encode_char(rgb, nb_char[i]);
-				(*img_out)->raw[count].b = rgb;
-			  break;
-		}
-		
-		//printf("La valeur RGB du Pixel %d : %d\n", count, rgb);
-		//printf("La valeur char du Pixel %d : %c\n", count, nb_char[i]);
-
-		
+		rgb = *(test_rgb+i);
+		rgb = encode_char(rgb, nb_char[i]);
+		*(test_rgb+i) = rgb;
 	}	
 }
 
@@ -135,7 +113,7 @@ int main(int argc, char **argv){
 	img_out = load_ppm("img.ppm");
 
 
-	//write_nb_char_in_img("00000000000000000000001011110100", &img_out);
+	// write_nb_char_in_img("00000000000000000000001011110100", &img_out);
 
 	// for (int i = 0; i < 11; i++)
 	// {
@@ -174,7 +152,7 @@ int main(int argc, char **argv){
 
 	printf("------ nb_char_header %s\n", nb_char_header);
 
-	//write_nb_char_in_img(nb_char_header, &img_out);
+	write_nb_char_in_img(nb_char_header, &img_out);
 	
 
 	file_to_str("text.txt", nb_char, &text);
