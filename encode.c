@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <pthread.h>
 //hello
-img_t **img;
+img_t *img;
 
 typedef struct limit_threads_st {
 	int initial_indice;
@@ -28,6 +28,18 @@ FILE * open_file(char* filename, char *mode){
 	}
 
 	return file;
+}
+
+char *int2bin(int a, char *buffer, int buf_size) {
+    buffer += (buf_size - 1);
+
+    for (int i = 31; i >= 0; i--) {
+        *buffer-- = (a & 1) + '0';
+
+        a >>= 1;
+    }
+
+    return buffer;
 }
 
 off_t fsize(const char *filename) {
@@ -79,16 +91,22 @@ int main(int argc, char **argv){
 	thread_t *threads_param = malloc(sizeof(pthread_t) * nb_threads);
 	char* text;
 	int max_char = max_char_encode(img);
+	printf("MaxChar : %d\n", max_char);
 	int nb_char = fsize("text.txt");
 	int nb_char_encoded = nb_char * BITS_PER_CHAR;
 	char* text_encoded;
 	float interval;
 	limit_threads_t limit;
+	char *nb_char_header = calloc(32+1, sizeof(char));
 
 	if (nb_char > max_char){
 		printf("Fichier texte trop long pour l'image\n");
 		exit(0);
 	}
+		
+	int2bin(nb_char, nb_char_header, 32);
+	// nb_char_header[33] = 0;
+	printf("------ nb_char_header %s\n", nb_char_header);
 
 	file_to_str("text.txt", nb_char, &text);
 	encode_str(text,nb_char,&text_encoded);
@@ -98,13 +116,15 @@ int main(int argc, char **argv){
 	interval = (float)nb_char_encoded / (float)nb_threads;
 	printf("%f\n\n\n",interval);
 
+	
+
 	for (int i = 0; i < nb_threads; i++){
 		int min = round(interval * i) + 0;
 		int max = round(interval * (i + 1)) - 1;
 		int char_in_interval = max + 1 - min;
 
 		char *test = calloc(char_in_interval + 1, sizeof(char));
-		
+
 		if (char_in_interval > 0){
 
 			limit = get_limits(min,max);
