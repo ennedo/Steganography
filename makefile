@@ -1,5 +1,5 @@
-GCC=gcc -g -Wall -Wextra -std=gnu11 -lpthread
-LIBS = -lm
+GCC=gcc -g -Wall -Wextra -std=gnu11 
+LIBS=-lm -lpthread
 
 encode: encode.o encode_lib.o ppm.o
 	$(GCC) $^ -o $@ $(LIBS)
